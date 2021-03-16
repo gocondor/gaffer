@@ -4,5 +4,6 @@
             "name": "gincoat-0.1-alpha",
             "url" : "https://github.com/gincoat/gincoat/archive/v0.1-alpha.tar.gz"
         }
-    }
+    },
+    "installerReleasedVersion": "0.1"
 }
