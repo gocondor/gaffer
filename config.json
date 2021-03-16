@@ -1,7 +1,7 @@
 {
     "releases": {
         "latest": {
-            "name": "gincoat-0.1-alpha",
+            "name": "gincoat-0.2-alpha",
             "url" : "https://github.com/gincoat/gincoat/archive/v0.2-alpha.tar.gz"
         }
     },
