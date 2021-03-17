@@ -1,8 +1,8 @@
 {
     "releases": {
         "latest": {
-            "name": "gincoat-0.2-alpha",
-            "url" : "https://github.com/gincoat/gincoat/archive/v0.2-alpha.tar.gz"
+            "name": "gincoat-0.3-alpha",
+            "url" : "https://github.com/gincoat/gincoat/archive/v0.3-alpha.tar.gz"
         }
     },
     "installerReleasedVersion": "0.1"
