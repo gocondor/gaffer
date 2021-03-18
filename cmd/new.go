@@ -39,7 +39,7 @@ const CONFIG_URL string = "https://raw.githubusercontent.com/gincoat/installer/m
 var tempName string
 
 // Current verson of the installer
-var version string = "v0.1-beta.3"
+var version string = "v0.1-beta.4"
 
 // newCmd represents the new command
 var newCmd = &cobra.Command{
@@ -189,10 +189,7 @@ func checkForUpdate(releasedVersion string) {
 This version of the Gincoat installer is outdated!
 Please update by running the following commands:
 
-#first
-go get -u github.com/gincoat/installer/gincoat
-#then
-go install github.com/gincoat/installer/gincoat
+go get -u github.com/gincoat/gincoatinstaller
 
 		`)
 		os.Exit(1)
