@@ -1,5 +1,5 @@
 {
-    "installerReleasedVersion": "0.1",
+    "installerReleasedVersion": "0.1-beta",
     "releases": {
         "latest": {
             "name": "gincoat-0.3-alpha.3",
