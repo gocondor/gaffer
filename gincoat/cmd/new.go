@@ -39,7 +39,7 @@ const CONFIG_URL string = "https://raw.githubusercontent.com/gincoat/installer/m
 var tempName string
 
 // Current verson of the installer
-var version string = "v0.1-beta.1"
+var version string = "v0.1-beta.2"
 
 // newCmd represents the new command
 var newCmd = &cobra.Command{
