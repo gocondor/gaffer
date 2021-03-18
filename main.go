@@ -4,7 +4,7 @@
 
 package main
 
-import "github.com/gincoat/installer/gincoat/cmd"
+import "github.com/gincoat/gincoatinstaller/cmd"
 
 func main() {
 	cmd.Execute()
