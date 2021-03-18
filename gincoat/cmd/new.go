@@ -39,7 +39,7 @@ const CONFIG_URL string = "https://raw.githubusercontent.com/gincoat/installer/m
 var tempName string
 
 // Current verson of the installer
-var version string = "v0.1-beta.2"
+var version string = "v0.1-beta.3"
 
 // newCmd represents the new command
 var newCmd = &cobra.Command{
@@ -131,7 +131,7 @@ func init() {
 
 // Download Gincoat archive
 func downloadGincoat(url string) string {
-	tempName = "gincoat_temp_" + randstr.Base64(8) + ".tar.gz"
+	tempName = "gincoat_temp_" + randstr.Hex(8) + ".tar.gz"
 	tempFilePath := os.TempDir() + "/" + tempName
 
 	response, err := http.Get(url)
@@ -187,9 +187,12 @@ func checkForUpdate(releasedVersion string) {
 	if releasedVersion != version {
 		fmt.Println(`
 This version of the Gincoat installer is outdated!
-Please update by running the following command:
+Please update by running the following commands:
 
-go install github.com/gincoat/installer
+#first
+go get -u github.com/gincoat/installer/gincoat
+#then
+go install github.com/gincoat/installer/gincoat
 
 		`)
 		os.Exit(1)
