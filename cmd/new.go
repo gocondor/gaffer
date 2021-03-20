@@ -41,6 +41,9 @@ var tempName string
 // Current verson of the installer
 var version string = "v0.1-beta.4"
 
+// struct for creating new project command
+type CmdNew struct{}
+
 // newCmd represents the new command
 var newCmd = &cobra.Command{
 	Use:   "new [project-name] [project-repository]",
@@ -52,19 +55,23 @@ Example:
 `,
 	Args: cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
-		// show the spinner
-		s := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
-		s.Start()
-		// Download the config from github
-		config := downloadConfig()
-		selectedRelease := config.Releases["latest"]
+		cn := CmdNew{}
 
 		// Extract the args
 		projectName := args[0]
 		projectRepo := args[1]
 
+		// show the spinner
+		s := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
+		s.Start()
+
+		// Download the config from github
+		var config Config
+		cn.DownloadConfig(&http.Client{}, CONFIG_URL, &config)
+		selectedRelease := config.Releases["latest"]
+
 		// Check for update
-		checkForUpdate(config.InstallerReleasedVersion)
+		cn.checkForUpdate(config.InstallerReleasedVersion)
 
 		// Check if a directory with the given name exist
 		_, err := os.Stat(projectName)
@@ -74,19 +81,17 @@ Example:
 		}
 
 		// Download the Gincoat release
-		filePath := downloadGincoat(selectedRelease.Url)
+		tempName = "gincoat_temp_" + randstr.Hex(8) + ".tar.gz"
+		url := config.Releases["latest"].Url
+		filePath := cn.DownloadGincoat(&http.Client{}, url, tempName)
 
 		// Get the current working directory
-		pwd, err := os.Getwd()
-		if err != nil {
-			fmt.Println("error getting the current working directory")
-			panic(err)
-		}
+		pwd, _ := os.Getwd()
 
 		// Open downloaded file
 		file, err := os.Open(filePath)
 		if err != nil {
-			fmt.Println("error opening the downloaded release")
+			fmt.Println("error opening the downloaded file")
 			panic(err)
 		}
 
@@ -97,7 +102,7 @@ Example:
 			panic(err)
 		}
 
-		// Rename to the project name
+		// Rename to the user's given project name
 		os.Rename("./"+selectedRelease.Name, "./"+projectName)
 
 		// Remove the downloaded Gincoat archive
@@ -116,6 +121,7 @@ Example:
 			panic(err)
 		}
 
+		// output the command execution result
 		fmt.Println(string(out))
 
 		// Hide the spinner
@@ -130,10 +136,8 @@ func init() {
 }
 
 // Download Gincoat archive
-func downloadGincoat(url string) string {
-	tempName = "gincoat_temp_" + randstr.Hex(8) + ".tar.gz"
+func (cn *CmdNew) DownloadGincoat(http *http.Client, url string, tempName string) string {
 	tempFilePath := os.TempDir() + "/" + tempName
-
 	response, err := http.Get(url)
 	if err != nil {
 		fmt.Println("error downloading the Gincoat release")
@@ -149,7 +153,6 @@ func downloadGincoat(url string) string {
 	defer file.Close()
 
 	_, err = io.Copy(file, response.Body)
-
 	if err != nil {
 		fmt.Println("error writing the Gincoat release to file")
 		panic(err)
@@ -159,9 +162,8 @@ func downloadGincoat(url string) string {
 }
 
 // Download config
-func downloadConfig() Config {
-	var conf Config
-	response, err := http.Get(CONFIG_URL)
+func (cn *CmdNew) DownloadConfig(http *http.Client, url string, conf *Config) *Config {
+	response, err := http.Get(url)
 	if err != nil {
 		fmt.Println("error downloading config")
 		panic(err)
@@ -183,13 +185,13 @@ func downloadConfig() Config {
 }
 
 // Check for updates
-func checkForUpdate(releasedVersion string) {
+func (cn *CmdNew) checkForUpdate(releasedVersion string) {
 	if releasedVersion != version {
 		fmt.Println(`
 This version of the Gincoat installer is outdated!
 Please update by running the following commands:
 
-go get -u github.com/gincoat/gincoatinstaller
+go get github.com/gincoat/gincoatinstaller
 
 		`)
 		os.Exit(1)
