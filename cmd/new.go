@@ -5,6 +5,7 @@
 package cmd
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -65,14 +66,6 @@ Example:
 		s := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
 		s.Start()
 
-		// Download the config from github
-		var config Config
-		cn.DownloadConfig(&http.Client{}, CONFIG_URL, &config)
-		selectedRelease := config.Releases["latest"]
-
-		// Check for update
-		cn.checkForUpdate(config.InstallerReleasedVersion)
-
 		// Check if a directory with the given name exist
 		_, err := os.Stat(projectName)
 		if !os.IsNotExist(err) {
@@ -80,9 +73,19 @@ Example:
 			os.Exit(0)
 		}
 
+		// Download the config from github
+		fmt.Println("Preparing ...")
+		var config Config
+		cn.DownloadConfig(&http.Client{}, CONFIG_URL, &config)
+		selectedRelease := config.Releases["latest"]
+
+		// Check for update
+		cn.checkForUpdate(config.InstallerReleasedVersion)
+
 		// Download the Gincoat release
 		tempName = "gincoat_temp_" + randstr.Hex(8) + ".tar.gz"
 		url := config.Releases["latest"].Url
+		fmt.Println("Downloading Gincoat ...")
 		filePath := cn.DownloadGincoat(&http.Client{}, url, tempName)
 
 		// Get the current working directory
@@ -96,6 +99,7 @@ Example:
 		}
 
 		// Unpack it
+		fmt.Println("Unpacking ...")
 		_, err = unpackit.Unpack(file, pwd)
 		if err != nil {
 			fmt.Println("error unpacking the downloaded release")
@@ -115,14 +119,28 @@ Example:
 		// Run go mod tidy
 		command := exec.Command("go", "mod", "tidy")
 		command.Dir = projectPath
-		out, err := command.Output()
-		if err != nil {
-			fmt.Println("error running go mod tidy")
-			panic(err)
-		}
+		stdout, err := command.StdoutPipe()
+		command.Start()
 
-		// output the command execution result
-		fmt.Println(string(out))
+		oneByte := make([]byte, 100)
+		num := 1
+		for {
+			_, err := stdout.Read(oneByte)
+
+			if err != nil {
+				fmt.Printf(err.Error())
+				break
+			}
+			r := bufio.NewReader(stdout)
+			line, _, _ := r.ReadLine()
+			fmt.Println(string(line))
+			num = num + 1
+
+			if num > 3 {
+				os.Exit(0)
+			}
+		}
+		command.Wait()
 
 		// Hide the spinner
 		s.Stop()
