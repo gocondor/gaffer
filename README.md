@@ -14,5 +14,5 @@ go get github.com/gincoat/gincoatinstaller
 ## Create a new project:
 To create a new project run the following command:
 ```bash
-gincoat new my-project github.com/my-organization/my-project
+gincoatinstaller new my-project github.com/my-organization/my-project
 ```
