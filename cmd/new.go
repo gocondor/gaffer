@@ -57,6 +57,7 @@ Example:
 	Args: cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		cn := CmdNew{}
+		var config Config
 
 		// Extract the args
 		projectName := args[0]
@@ -75,12 +76,14 @@ Example:
 
 		// Download the config from github
 		fmt.Println("Preparing ...")
-		var config Config
 		cn.DownloadConfig(&http.Client{}, CONFIG_URL, &config)
 		selectedRelease := config.Releases["latest"]
 
 		// Check for update
-		cn.checkForUpdate(config.InstallerReleasedVersion)
+		yes := cn.IsUpdatedRequired(config.InstallerReleasedVersion)
+		if yes {
+			cn.PrintUpdateRequiredMessage()
+		}
 
 		// Download the Gincoat release
 		tempName = "gincoat_temp_" + randstr.Hex(8) + ".tar.gz"
@@ -203,17 +206,23 @@ func (cn *CmdNew) DownloadConfig(http *http.Client, url string, conf *Config) *C
 }
 
 // Check for updates
-func (cn *CmdNew) checkForUpdate(releasedVersion string) {
-	if releasedVersion != version {
-		fmt.Println(`
-This version of the Gincoat installer is outdated!
-Please update by running the following commands:
-
-go get github.com/gincoat/gincoatinstaller
-
-		`)
-		os.Exit(1)
+func (cn *CmdNew) IsUpdatedRequired(LatestReleasedVersion string) bool {
+	if LatestReleasedVersion != version {
+		return true
 	}
+	return false
+}
+
+// Print update required
+func (cn *CmdNew) PrintUpdateRequiredMessage() {
+	fmt.Println(`
+	This version of the Gincoat installer is outdated!
+	Please update by running the following commands:
+	
+	go get github.com/gincoat/gincoatinstaller
+	
+			`)
+	os.Exit(1)
 }
 
 func fixImports(dirName string, projectRepo string, paths []string) {

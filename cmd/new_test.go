@@ -1,6 +1,7 @@
 package cmd_test
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -56,4 +57,23 @@ func TestDownloadGincoat(t *testing.T) {
 
 	// Cleanup
 	os.Remove(filePath)
+}
+
+func TestIsUpdatedRequired(t *testing.T) {
+
+	// Prepare
+	cn := CmdNew{}
+	var config Config
+	res, _ := os.ReadFile("testdata/config.json")
+
+	json.Unmarshal(res, &config)
+
+	// Execute
+	check := cn.IsUpdatedRequired(config.InstallerReleasedVersion)
+
+	// Assert
+	if check != true { // supposed to be true
+		t.Fatal("failed to assert check for update")
+	}
+
 }
