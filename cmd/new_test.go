@@ -2,6 +2,7 @@ package cmd_test
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -60,12 +61,10 @@ func TestDownloadGincoat(t *testing.T) {
 }
 
 func TestIsUpdatedRequired(t *testing.T) {
-
 	// Prepare
 	cn := CmdNew{}
 	var config Config
 	res, _ := os.ReadFile("testdata/config.json")
-
 	json.Unmarshal(res, &config)
 
 	// Execute
@@ -75,5 +74,30 @@ func TestIsUpdatedRequired(t *testing.T) {
 	if check != true { // supposed to be true
 		t.Fatal("failed to assert check for update")
 	}
+}
 
+func TestUnpack(t *testing.T) {
+	// Prepare
+	cn := CmdNew{}
+	filepath := "./testdata/gincoat.tar.gz"
+	folderName := "gincoat-0.3-alpha.3"
+	destPath := os.TempDir()
+	os.RemoveAll(destPath + "/" + folderName)
+
+	// Execute
+	cn.Unpack(filepath, destPath)
+
+	// Assert
+	_, err := os.Stat(destPath + "/" + folderName)
+	if os.IsNotExist(err) {
+		t.Fatal("failed to assert unpack")
+	}
+
+	files, err := ioutil.ReadDir(destPath + "/" + folderName)
+	if len(files) <= 0 {
+		t.Fatal("failed to assert unpack")
+	}
+
+	// remove the temp dir
+	os.RemoveAll(destPath + "/" + folderName)
 }

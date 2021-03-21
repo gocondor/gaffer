@@ -80,34 +80,18 @@ Example:
 		selectedRelease := config.Releases["latest"]
 
 		// Check for update
-		yes := cn.IsUpdatedRequired(config.InstallerReleasedVersion)
-		if yes {
+		if yes := cn.IsUpdatedRequired(config.InstallerReleasedVersion); yes {
 			cn.PrintUpdateRequiredMessage()
 		}
 
 		// Download the Gincoat release
-		tempName = "gincoat_temp_" + randstr.Hex(8) + ".tar.gz"
-		url := config.Releases["latest"].Url
 		fmt.Println("Downloading Gincoat ...")
-		filePath := cn.DownloadGincoat(&http.Client{}, url, tempName)
+		filePath := cn.DownloadGincoat(&http.Client{}, config.Releases["latest"].Url, cn.GenerateTempName())
 
-		// Get the current working directory
-		pwd, _ := os.Getwd()
-
-		// Open downloaded file
-		file, err := os.Open(filePath)
-		if err != nil {
-			fmt.Println("error opening the downloaded file")
-			panic(err)
-		}
-
-		// Unpack it
+		//Unpack file
 		fmt.Println("Unpacking ...")
-		_, err = unpackit.Unpack(file, pwd)
-		if err != nil {
-			fmt.Println("error unpacking the downloaded release")
-			panic(err)
-		}
+		pwd, _ := os.Getwd()
+		cn.Unpack(filePath, pwd)
 
 		// Rename to the user's given project name
 		os.Rename("./"+selectedRelease.Name, "./"+projectName)
@@ -258,4 +242,25 @@ func fixImports(dirName string, projectRepo string, paths []string) {
 		fmt.Println("error writing to go.mod file")
 		panic(err)
 	}
+}
+
+func (cn *CmdNew) Unpack(filePath string, destPath string) {
+	// Open file
+	file, err := os.Open(filePath)
+	if err != nil {
+		fmt.Println("error opening the downloaded file")
+		panic(err)
+	}
+	defer file.Close()
+
+	// Unpack it
+	_, err = unpackit.Unpack(file, destPath)
+	if err != nil {
+		fmt.Println("error unpacking the downloaded release")
+		panic(err)
+	}
+}
+
+func (cn *CmdNew) GenerateTempName() string {
+	return "gincoat_temp_" + randstr.Hex(8) + ".tar.gz"
 }
