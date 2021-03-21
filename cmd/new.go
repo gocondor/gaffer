@@ -197,7 +197,7 @@ func (cn *CmdNew) IsUpdatedRequired(LatestReleasedVersion string) bool {
 	return false
 }
 
-// Print update required
+// Print update required message
 func (cn *CmdNew) PrintUpdateRequiredMessage() {
 	fmt.Println(`
 	This version of the Gincoat installer is outdated!
@@ -244,6 +244,7 @@ func fixImports(dirName string, projectRepo string, paths []string) {
 	}
 }
 
+// Unpack Gincoat
 func (cn *CmdNew) Unpack(filePath string, destPath string) {
 	// Open file
 	file, err := os.Open(filePath)
@@ -261,6 +262,7 @@ func (cn *CmdNew) Unpack(filePath string, destPath string) {
 	}
 }
 
+// Generate random name
 func (cn *CmdNew) GenerateTempName() string {
 	return "gincoat_temp_" + randstr.Hex(8) + ".tar.gz"
 }
