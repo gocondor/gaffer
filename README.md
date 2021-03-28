@@ -3,7 +3,7 @@
 ## [Under Development]
 
 ### What's Gincoat Installer?
-Gincoat installer helps you create new Gincoat projects.
+Gincoat installer helps you create new Gincoat projects and perform other tasks on it.
 
 ![Build Status](https://github.com/gincoat/installer/actions/workflows/build.yml/badge.svg)
 ![Test Status](https://github.com/gincoat/installer/actions/workflows/test.yml/badge.svg)
