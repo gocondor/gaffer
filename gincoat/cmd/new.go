@@ -40,7 +40,7 @@ const CONFIG_URL string = "https://raw.githubusercontent.com/gincoat/installer/m
 var tempName string
 
 // Current verson of the installer
-var version string = "v0.1-beta.5"
+var version string = "v0.1-beta.6"
 
 // struct for creating new project command
 type CmdNew struct{}
