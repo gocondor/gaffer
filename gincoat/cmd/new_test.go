@@ -8,7 +8,7 @@ import (
 	"os"
 	"testing"
 
-	. "github.com/gincoat/gincoatinstaller/cmd"
+	. "github.com/gincoat/installer/gincoat/cmd"
 	"github.com/stretchr/testify/assert"
 	"github.com/thanhpk/randstr"
 )

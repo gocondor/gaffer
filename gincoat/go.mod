@@ -1,4 +1,4 @@
-module github.com/gincoat/gincoatinstaller
+module github.com/gincoat/installer/gincoat
 
 go 1.16
 

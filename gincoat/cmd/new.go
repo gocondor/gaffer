@@ -203,7 +203,7 @@ func (cn *CmdNew) PrintUpdateRequiredMessage() {
 	This version of the Gincoat installer is outdated!
 	Please update by running the following commands:
 	
-	go get github.com/gincoat/gincoatinstaller
+	go get github.com/gincoat/installer/gincoat
 	
 			`)
 	os.Exit(1)
