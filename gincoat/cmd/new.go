@@ -34,7 +34,7 @@ type Config struct {
 }
 
 // Config file
-const CONFIG_URL string = "https://raw.githubusercontent.com/gincoat/installer/master/config.json"
+const CONFIG_URL string = "https://raw.githubusercontent.com/gincoat/installer/master/gincoat/config.json"
 
 // Temporary file name
 var tempName string
