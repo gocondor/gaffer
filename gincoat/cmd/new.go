@@ -40,7 +40,7 @@ const CONFIG_URL string = "https://raw.githubusercontent.com/gincoat/installer/m
 var tempName string
 
 // Current verson of the installer
-var version string = "v1.0-beta.6"
+var version string = "v1.0-beta.7"
 
 // struct for creating new project command
 type CmdNew struct{}
@@ -203,7 +203,7 @@ func (cn *CmdNew) PrintUpdateRequiredMessage() {
 	This version of the Gincoat installer is outdated!
 	Please update by running the following commands:
 	
-	go get github.com/gincoat/installer/gincoat
+	go get github.com/gincoat/installer/gincoat@latest
 	
 			`)
 	os.Exit(1)

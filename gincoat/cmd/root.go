@@ -15,7 +15,7 @@ var cfgFile string
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:     "gincoat",
-	Version: "v1.0-beta.6",
+	Version: "v1.0-beta.7",
 	Short:   "Gincoat framework installer",
 	Long: `Gincoat installer helps you create new Gincoat framework projects.
 `,
