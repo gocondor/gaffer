@@ -87,7 +87,6 @@ gocondor new my-app github.com/my-organization/my-app
 		// Download the gocondor release
 		fmt.Println("Downloading gocondor ...")
 		filePath := cn.DownloadGoCondor(&http.Client{}, config.Releases["latest"].Url, cn.GenerateTempName())
-
 		//Unpack file
 		fmt.Println("Unpacking ...")
 		pwd, _ := os.Getwd()

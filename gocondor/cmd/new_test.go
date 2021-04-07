@@ -80,7 +80,7 @@ func TestUnpack(t *testing.T) {
 	// Prepare
 	cn := CmdNew{}
 	filepath := "./testdata/gocondor.tar.gz"
-	folderName := "gocondor-0.3-alpha.3"
+	folderName := "gocondor-0.3-alpha.6"
 	destPath := os.TempDir()
 	os.RemoveAll(destPath + "/" + folderName)
 
