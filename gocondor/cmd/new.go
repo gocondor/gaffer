@@ -40,7 +40,7 @@ const CONFIG_URL string = "https://raw.githubusercontent.com/gocondor/installer/
 var tempName string
 
 // Current verson of the installer
-var version string = "v1.0.2"
+var version string = "v1.0.3"
 
 // struct for creating new project command
 type CmdNew struct{}
