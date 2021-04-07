@@ -34,13 +34,13 @@ type Config struct {
 }
 
 // Config file
-const CONFIG_URL string = "https://raw.githubusercontent.com/gocondor/installer/master/condor/config.json"
+const CONFIG_URL string = "https://raw.githubusercontent.com/gocondor/installer/master/gocondor/config.json"
 
 // Temporary file name
 var tempName string
 
 // Current verson of the installer
-var version string = "v1.0.1"
+var version string = "v1.0.2"
 
 // struct for creating new project command
 type CmdNew struct{}
@@ -48,11 +48,11 @@ type CmdNew struct{}
 // newCmd represents the new command
 var newCmd = &cobra.Command{
 	Use:   "new [project-name] [project-repository]",
-	Short: "Create a new condor projects",
-	Long: `Create new condor projects, 
+	Short: "Create a new gocondor projects",
+	Long: `Create new gocondor projects, 
 	
 Example:
-condor new my-app github.com/my-organization/my-app
+gocondor new my-app github.com/my-organization/my-app
 `,
 	Args: cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
@@ -84,9 +84,9 @@ condor new my-app github.com/my-organization/my-app
 			cn.PrintUpdateRequiredMessage()
 		}
 
-		// Download the condor release
-		fmt.Println("Downloading condor ...")
-		filePath := cn.DownloadCondor(&http.Client{}, config.Releases["latest"].Url, cn.GenerateTempName())
+		// Download the gocondor release
+		fmt.Println("Downloading gocondor ...")
+		filePath := cn.DownloadGoCondor(&http.Client{}, config.Releases["latest"].Url, cn.GenerateTempName())
 
 		//Unpack file
 		fmt.Println("Unpacking ...")
@@ -96,7 +96,7 @@ condor new my-app github.com/my-organization/my-app
 		// Rename to the user's given project name
 		os.Rename("./"+selectedRelease.Name, "./"+projectName)
 
-		// Remove the downloaded condor archive
+		// Remove the downloaded gocondor archive
 		os.Remove(filePath)
 
 		// Fix imports
@@ -140,12 +140,12 @@ func init() {
 	rootCmd.AddCommand(newCmd)
 }
 
-// Download condor archive
-func (cn *CmdNew) DownloadCondor(http *http.Client, url string, tempName string) string {
+// Download gocondor archive
+func (cn *CmdNew) DownloadGoCondor(http *http.Client, url string, tempName string) string {
 	tempFilePath := os.TempDir() + "/" + tempName
 	response, err := http.Get(url)
 	if err != nil {
-		fmt.Println("error downloading the Condor release")
+		fmt.Println("error downloading the GoCondor release")
 		panic(err)
 	}
 	defer response.Body.Close()
@@ -159,7 +159,7 @@ func (cn *CmdNew) DownloadCondor(http *http.Client, url string, tempName string)
 
 	_, err = io.Copy(file, response.Body)
 	if err != nil {
-		fmt.Println("error writing the Condor release to file")
+		fmt.Println("error writing the GoCondor release to file")
 		panic(err)
 	}
 
@@ -200,10 +200,10 @@ func (cn *CmdNew) IsUpdatedRequired(LatestReleasedVersion string) bool {
 // Print update required message
 func (cn *CmdNew) PrintUpdateRequiredMessage() {
 	fmt.Println(`
-	This version of the Condor installer is outdated!
+	This version of the GoCondor installer is outdated!
 	Please update by running the following commands:
 	
-	go get github.com/gocondor/installer/condor@latest
+	go get github.com/gocondor/installer/gocondor@latest
 	
 			`)
 	os.Exit(1)
@@ -244,7 +244,7 @@ func fixImports(dirName string, projectRepo string, paths []string) {
 	}
 }
 
-// Unpack Condor
+// Unpack GoCondor
 func (cn *CmdNew) Unpack(filePath string, destPath string) {
 	// Open file
 	file, err := os.Open(filePath)
@@ -264,5 +264,5 @@ func (cn *CmdNew) Unpack(filePath string, destPath string) {
 
 // Generate random name
 func (cn *CmdNew) GenerateTempName() string {
-	return "condor_temp_" + randstr.Hex(8) + ".tar.gz"
+	return "gocondor_temp_" + randstr.Hex(8) + ".tar.gz"
 }

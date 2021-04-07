@@ -4,7 +4,7 @@
 
 package main
 
-import "github.com/gocondor/installer/condor/cmd"
+import "github.com/gocondor/installer/gocondor/cmd"
 
 func main() {
 	cmd.Execute()

@@ -1,4 +1,4 @@
-module github.com/gocondor/installer/condor
+module github.com/gocondor/installer/gocondor
 
 go 1.16
 

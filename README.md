@@ -1,9 +1,9 @@
-# Condor Installer
+# GoCondor Installer
 
 ## [Under Development]
 
-### What's Condor Installer?
-Condor installer helps you create new Condor projects and perform other tasks on it.
+### What's GoCondor Installer?
+GoCondor installer helps you create new GoCondor projects and perform other tasks on it.
 
 ![Build Status](https://github.com/gocondor/installer/actions/workflows/build.yml/badge.svg)
 ![Test Status](https://github.com/gocondor/installer/actions/workflows/test.yml/badge.svg)
@@ -12,11 +12,11 @@ Condor installer helps you create new Condor projects and perform other tasks on
 ### Install
 To install run the following command:
 ```bash
-go get github.com/gocondor/installer/condor
+go get github.com/gocondor/installer/gocondor
 ```
 
 ## Create a new project:
 To create a new project run the following command:
 ```bash
-condor new my-project github.com/my-organization/my-project
+gocondor new my-project github.com/my-organization/my-project
 ```
