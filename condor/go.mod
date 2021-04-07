@@ -1,4 +1,4 @@
-module github.com/gincoat/installer/gincoat
+module github.com/gocondor/installer/condor
 
 go 1.16
 

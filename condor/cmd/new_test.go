@@ -8,7 +8,7 @@ import (
 	"os"
 	"testing"
 
-	. "github.com/gincoat/installer/gincoat/cmd"
+	. "github.com/gocondor/installer/condor/cmd"
 	"github.com/stretchr/testify/assert"
 	"github.com/thanhpk/randstr"
 )
@@ -34,12 +34,12 @@ func TestDownloadConfig(t *testing.T) {
 	assert.Equal(t, "dummyName", config.Releases["latest"].Name)
 	assert.Equal(t, "dummyUrl", config.Releases["latest"].Url)
 }
-func TestDownloadGincoat(t *testing.T) {
+func TestDownloadCondor(t *testing.T) {
 	// Prepare
 	newCmd := CmdNew{}
-	fileName := "gincoat_temp_" + randstr.Hex(8) + ".tar.gz"
+	fileName := "condor_temp_" + randstr.Hex(8) + ".tar.gz"
 	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-		res, err := os.ReadFile("testdata/gincoat.tar.gz")
+		res, err := os.ReadFile("testdata/condor.tar.gz")
 		if err != nil {
 			t.Fatal("error reading test data", err)
 		}
@@ -48,7 +48,7 @@ func TestDownloadGincoat(t *testing.T) {
 	defer server.Close()
 
 	// Execute
-	filePath := newCmd.DownloadGincoat(server.Client(), server.URL, fileName)
+	filePath := newCmd.DownloadCondor(server.Client(), server.URL, fileName)
 
 	// Assert
 	_, err := os.Stat(filePath)
@@ -79,8 +79,8 @@ func TestIsUpdatedRequired(t *testing.T) {
 func TestUnpack(t *testing.T) {
 	// Prepare
 	cn := CmdNew{}
-	filepath := "./testdata/gincoat.tar.gz"
-	folderName := "gincoat-0.3-alpha.3"
+	filepath := "./testdata/condor.tar.gz"
+	folderName := "condor-0.3-alpha.3"
 	destPath := os.TempDir()
 	os.RemoveAll(destPath + "/" + folderName)
 

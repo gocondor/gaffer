@@ -1,22 +1,22 @@
-# Gincoat Installer
+# Condor Installer
 
 ## [Under Development]
 
-### What's Gincoat Installer?
-Gincoat installer helps you create new Gincoat projects and perform other tasks on it.
+### What's Condor Installer?
+Condor installer helps you create new Condor projects and perform other tasks on it.
 
-![Build Status](https://github.com/gincoat/installer/actions/workflows/build.yml/badge.svg)
-![Test Status](https://github.com/gincoat/installer/actions/workflows/test.yml/badge.svg)
+![Build Status](https://github.com/gocondor/installer/actions/workflows/build.yml/badge.svg)
+![Test Status](https://github.com/gocondor/installer/actions/workflows/test.yml/badge.svg)
 
 
 ### Install
 To install run the following command:
 ```bash
-go get github.com/gincoat/installer/gincoat
+go get github.com/gocondor/installer/condor
 ```
 
 ## Create a new project:
 To create a new project run the following command:
 ```bash
-gincoat new my-project github.com/my-organization/my-project
+condor new my-project github.com/my-organization/my-project
 ```

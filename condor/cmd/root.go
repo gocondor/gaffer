@@ -14,10 +14,10 @@ var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:     "gincoat",
+	Use:     "condor",
 	Version: "v1.0.1",
-	Short:   "Gincoat framework installer",
-	Long: `Gincoat installer helps you create new Gincoat framework projects.
+	Short:   "Condor framework installer",
+	Long: `Condor installer helps you create new Condor framework projects.
 `,
 
 	// Run: func(cmd *cobra.Command, args []string) {
@@ -45,7 +45,7 @@ func initConfig() {
 
 		// Search config in home directory with name ".installer" (without extension).
 		viper.AddConfigPath(home)
-		viper.SetConfigName(".gincoat")
+		viper.SetConfigName(".condor")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match

@@ -1,0 +1,12 @@
+{
+    "installerReleasedVersion": "v1.0.1",
+    "releases": {
+        "latest": {
+            "name": "condor-0.3-alpha.3",
+            "url" : "https://github.com/gocondor/condor/archive/v0.3-alpha.3.tar.gz"
+        }
+    },
+    "paths": [
+        "github.com/gocondor/condor"
+    ]
+}
