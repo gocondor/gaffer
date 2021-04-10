@@ -31,8 +31,7 @@ func TestDownloadConfig(t *testing.T) {
 
 	// Assert
 	assert.Equal(t, "dummyVersion", config.InstallerReleasedVersion)
-	assert.Equal(t, "dummyName", config.Releases["latest"].Name)
-	assert.Equal(t, "dummyUrl", config.Releases["latest"].Url)
+	assert.Equal(t, "dummyReleaseurl", config.ReleaseUrl)
 }
 func TestDownloadGoCondor(t *testing.T) {
 	// Prepare

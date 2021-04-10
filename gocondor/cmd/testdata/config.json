@@ -1,11 +1,6 @@
 {
     "installerReleasedVersion": "dummyVersion",
-    "releases": {
-        "latest": {
-            "name": "dummyName",
-            "url" : "dummyUrl"
-        }
-    },
+    "releaseUrl": "dummyReleaseurl",
     "paths": [
         "dummyPath"
     ]
