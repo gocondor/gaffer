@@ -1,11 +1,6 @@
 {
     "installerReleasedVersion": "v1.0.3",
-    "releases": {
-        "latest": {
-            "name": "gocondor-0.3-alpha.6",
-            "url" : "https://github.com/gocondor/gocondor/archive/v0.3-alpha.6.tar.gz"
-        }
-    },
+    "releaseUrl": "https://github.com/gocondor/gocondor/archive/{name}.tar.gz",
     "paths": [
         "github.com/gocondor/gocondor"
     ]
