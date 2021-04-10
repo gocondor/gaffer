@@ -15,6 +15,7 @@ import (
 	"os/exec"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/briandowns/spinner"
 	"github.com/c4milo/unpackit"
@@ -23,24 +24,27 @@ import (
 	"github.com/thanhpk/randstr"
 )
 
-type Release struct {
-	Name string `json:"name"`
-	Url  string `json:"url"`
-}
 type Config struct {
-	Releases                 map[string]Release `json:"releases"`
-	InstallerReleasedVersion string             `json:"installerReleasedVersion"`
-	Paths                    []string           `json:"paths"`
+	ReleaseUrl               string   `json:"releaseUrl"`
+	InstallerReleasedVersion string   `json:"installerReleasedVersion"`
+	Paths                    []string `json:"paths"`
+}
+
+type RepoMeta struct {
+	TagName    string `json:"tag_name"`
+	TarBallUrl string `json:"tarball_url"`
 }
 
 // Config file
 const CONFIG_URL string = "https://raw.githubusercontent.com/gocondor/installer/master/gocondor/config.json"
 
+const REPO_URL string = "https://api.github.com/repos/gocondor/gocondor/releases/latest"
+
 // Temporary file name
 var tempName string
 
 // Current verson of the installer
-var version string = "v1.0.3"
+var version string = "v1.0.4"
 
 // struct for creating new project command
 type CmdNew struct{}
@@ -57,7 +61,6 @@ gocondor new my-app github.com/my-organization/my-app
 	Args: cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		cn := CmdNew{}
-		var config Config
 
 		// Extract the args
 		projectName := args[0]
@@ -76,30 +79,36 @@ gocondor new my-app github.com/my-organization/my-app
 
 		// Download the config from github
 		fmt.Println("Preparing ...")
-		cn.DownloadConfig(&http.Client{}, CONFIG_URL, &config)
-		selectedRelease := config.Releases["latest"]
 
+		var config Config
+		cn.DownloadConfig(&http.Client{}, CONFIG_URL, &config)
 		// Check for update
 		if yes := cn.IsUpdatedRequired(config.InstallerReleasedVersion); yes {
 			cn.PrintUpdateRequiredMessage()
 		}
 
+		repoMeta := FetchRepoMeta(REPO_URL)
+		downloadUrl := strings.Replace(config.ReleaseUrl, "{name}", repoMeta.TagName, 1)
+
 		// Download the gocondor release
 		fmt.Println("Downloading gocondor ...")
-		filePath := cn.DownloadGoCondor(&http.Client{}, config.Releases["latest"].Url, cn.GenerateTempName())
+		filePath := cn.DownloadGoCondor(&http.Client{}, downloadUrl, cn.GenerateTempName())
 		//Unpack file
 		fmt.Println("Unpacking ...")
 		pwd, _ := os.Getwd()
 		cn.Unpack(filePath, pwd)
 
 		// Rename to the user's given project name
-		os.Rename("./"+selectedRelease.Name, "./"+projectName)
-
+		os.Rename("./gocondor-"+removeFirstCHar(repoMeta.TagName), "./"+projectName) //first char is `v`
 		// Remove the downloaded gocondor archive
 		os.Remove(filePath)
 
-		// Fix imports
 		projectPath := pwd + "/" + projectName
+
+		//remove .github folder
+		os.RemoveAll(projectPath + "/.github")
+
+		// Fix imports
 		fixImports(projectPath, projectRepo, config.Paths)
 
 		// Run go mod tidy
@@ -264,4 +273,28 @@ func (cn *CmdNew) Unpack(filePath string, destPath string) {
 // Generate random name
 func (cn *CmdNew) GenerateTempName() string {
 	return "gocondor_temp_" + randstr.Hex(8) + ".tar.gz"
+}
+
+func FetchRepoMeta(url string) RepoMeta {
+	var repoMeta RepoMeta
+
+	// get the latest released version number
+	res, err := http.Get(url)
+	if err != nil {
+		panic(err)
+	}
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		panic(err)
+	}
+	json.Unmarshal(body, &repoMeta)
+
+	return repoMeta
+}
+
+func removeFirstCHar(str string) string {
+	_, i := utf8.DecodeRuneInString(str)
+
+	return str[i:]
 }
