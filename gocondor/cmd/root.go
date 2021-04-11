@@ -15,7 +15,7 @@ var cfgFile string
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:     "gocondor",
-	Version: "v1.0.4",
+	Version: "v1.0.5",
 	Short:   "GoCondor framework installer",
 	Long: `GoCondor installer helps you create new GoCondor framework projects.
 `,

@@ -80,14 +80,12 @@ func restartController(fileChangeChan chan bool, processChan chan *os.Process) {
 		err := killCmd.Run()
 		if err != nil {
 			fmt.Println("error stoping the server [os is windows]")
-			panic(err)
 		}
 	} else {
 		// stop for other os
 		err := process.Kill()
 		if err != nil {
 			fmt.Printf("error stoping the dev server [os is %s]", runtime.GOOS)
-			panic(err)
 		}
 	}
 
