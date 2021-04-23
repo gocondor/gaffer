@@ -154,21 +154,21 @@ func (cn *CmdNew) DownloadGoCondor(http *http.Client, url string, tempName strin
 	response, err := http.Get(url)
 	if err != nil {
 		fmt.Println("error downloading the GoCondor release")
-		panic(err)
+		os.Exit(1)
 	}
 	defer response.Body.Close()
 
 	file, err := os.Create(tempFilePath)
 	if err != nil {
 		fmt.Println("error creating temp file")
-		panic(err)
+		os.Exit(1)
 	}
 	defer file.Close()
 
 	_, err = io.Copy(file, response.Body)
 	if err != nil {
 		fmt.Println("error writing the GoCondor release to file")
-		panic(err)
+		os.Exit(1)
 	}
 
 	return tempFilePath
@@ -179,19 +179,19 @@ func (cn *CmdNew) DownloadConfig(http *http.Client, url string, conf *Config) *C
 	response, err := http.Get(url)
 	if err != nil {
 		fmt.Println("error downloading config")
-		panic(err)
+		os.Exit(1)
 	}
 
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		fmt.Println("error reading config")
-		panic(err)
+		os.Exit(1)
 	}
 
 	err = json.Unmarshal(body, &conf)
 	if err != nil {
 		fmt.Println("error unmarshaling config")
-		panic(err)
+		os.Exit(1)
 	}
 
 	return conf
@@ -224,7 +224,7 @@ func fixImports(dirName string, projectRepo string, paths []string) {
 				file, err := ioutil.ReadFile(osPathname)
 				if err != nil {
 					fmt.Printf("error reading %s", osPathname)
-					panic(err)
+					os.Exit(1)
 				}
 				newContent := strings.Replace(string(file), paths[0], projectRepo, -1)
 				ioutil.WriteFile(osPathname, []byte(newContent), 0)
@@ -242,13 +242,13 @@ func fixImports(dirName string, projectRepo string, paths []string) {
 	file, err := ioutil.ReadFile(dirName + "/go.mod")
 	if err != nil {
 		fmt.Println("error reading go.mod file")
-		panic(err)
+		os.Exit(1)
 	}
 	newContent := strings.Replace(string(file), paths[0], projectRepo, -1)
 	err = ioutil.WriteFile(dirName+"/go.mod", []byte(newContent), 0)
 	if err != nil {
 		fmt.Println("error writing to go.mod file")
-		panic(err)
+		os.Exit(1)
 	}
 }
 
@@ -258,7 +258,7 @@ func (cn *CmdNew) Unpack(filePath string, destPath string) {
 	file, err := os.Open(filePath)
 	if err != nil {
 		fmt.Println("error opening the downloaded file")
-		panic(err)
+		os.Exit(1)
 	}
 	defer file.Close()
 
@@ -266,7 +266,7 @@ func (cn *CmdNew) Unpack(filePath string, destPath string) {
 	_, err = unpackit.Unpack(file, destPath)
 	if err != nil {
 		fmt.Println("error unpacking the downloaded release")
-		panic(err)
+		os.Exit(1)
 	}
 }
 
@@ -281,12 +281,12 @@ func FetchRepoMeta(url string) RepoMeta {
 	// get the latest released version number
 	res, err := http.Get(url)
 	if err != nil {
-		panic(err)
+		os.Exit(1)
 	}
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		panic(err)
+		os.Exit(1)
 	}
 	json.Unmarshal(body, &repoMeta)
 
