@@ -28,7 +28,7 @@ cli run:dev
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		pwd, _ := os.Getwd()
-		fmt.Println("Starting the server...")
+		fmt.Println("Starting ...")
 		fileChangeChan := make(chan bool)
 		processChan := make(chan *os.Process)
 
@@ -123,5 +123,5 @@ func startServer(fileChangeChan chan bool, processChan chan *os.Process) {
 }
 
 func init() {
-	rootCmd.AddCommand(runCmd)
+	//rootCmd.AddCommand(runCmd)
 }
