@@ -6,11 +6,14 @@ package cmd
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/exec"
+	"path"
 	"runtime"
 	"strconv"
+	"syscall"
 	"time"
 
 	"github.com/radovskyb/watcher"
@@ -28,21 +31,23 @@ cli run:dev
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		pwd, _ := os.Getwd()
-		fmt.Println("Starting ...")
-		fileChangeChan := make(chan bool)
-		processChan := make(chan *os.Process)
-
+		fileChangeChan := make(chan bool, 5)
+		startAppChan := make(chan bool, 5)
+		stdoutChan := make(chan io.ReadCloser, 5)
+		cmdChan := make(chan *exec.Cmd)
+		fileChangeChan <- false
+		startAppChan <- false
 		w := watcher.New()
 		w.SetMaxEvents(1)
 		w.IgnoreHiddenFiles(true)
 		w.Ignore(
-			pwd + "/logs/app.log",
+			pwd+"/logs/app.log",
+			pwd+"/tmp",
 		)
 		w.FilterOps(watcher.Rename, watcher.Move, watcher.Create, watcher.Write)
 		if err := w.AddRecursive(pwd); err != nil {
 			log.Fatalln(err)
 		}
-
 		go func(fileChangeChan chan bool) {
 			for {
 				select {
@@ -55,61 +60,121 @@ cli run:dev
 				}
 			}
 		}(fileChangeChan)
+		go func() {
+			startAppChan <- true
+		}()
+		go startServerJob(cmdChan, startAppChan, stdoutChan)
+		go startRestartControllerJob(fileChangeChan, cmdChan, startAppChan, stdoutChan)
 
-		go startServer(fileChangeChan, processChan)
-		go restartController(fileChangeChan, processChan)
-
-		// Start the watching process - it'll check for changes every 100ms.
 		func() {
 			if err := w.Start(time.Millisecond * 100); err != nil {
 				log.Fatalln(err)
 			}
 		}()
-
 	},
 }
 
-func restartController(fileChangeChan chan bool, processChan chan *os.Process) {
-	process := <-processChan
-	<-fileChangeChan
-	fmt.Println("Restarting...")
-	//recived file change, kill the process and then restart it again
-	// stop for windows
-	if runtime.GOOS == "windows" {
-		killCmd := exec.Command("taskkill", "/T", "/F", "/PID", strconv.Itoa(process.Pid))
-		err := killCmd.Run()
-		if err != nil {
-			fmt.Println("error stoping the server [os is windows]")
-		}
-	} else {
-		// stop for other os
-		err := process.Kill()
-		if err != nil {
-			fmt.Printf("error stoping the dev server [os is %s]", runtime.GOOS)
+func startRestartControllerJob(fileChangeChan chan bool, cmdChan chan *exec.Cmd, startAppChan chan bool, stdoutChan chan io.ReadCloser) {
+	for {
+		fileChanged := <-fileChangeChan
+		if fileChanged {
+			fmt.Println("Restarting...")
+			startCmd := <-cmdChan
+			if runtime.GOOS == "windows" {
+				killCmd := exec.Command("taskkill", "/T", "/F", "/PID", strconv.Itoa(startCmd.Process.Pid))
+				err := killCmd.Run()
+				if err != nil {
+					fmt.Printf("error stoping the dev server")
+				}
+			} else if runtime.GOOS == "darwin" {
+				// fmt.Println("stop process state:", startCmd.ProcessState.String())
+				err := startCmd.Process.Kill()
+				if err != nil {
+					fmt.Println("error stoping the dev server ")
+				}
+			}
+			go func() {
+				startAppChan <- true
+			}()
+			go func() {
+				fileChangeChan <- false
+			}()
+			startCmdStdout := <-stdoutChan
+			if startCmdStdout != nil {
+				startCmdStdout.Close()
+			}
 		}
 	}
-
-	// start the server again
-	go startServer(fileChangeChan, processChan)
-
-	// restart the controller
-	go restartController(fileChangeChan, processChan)
 }
 
-func startServer(fileChangeChan chan bool, processChan chan *os.Process) {
+func startServerJob(cmdChan chan *exec.Cmd, startAppChan chan bool, stdoutChan chan io.ReadCloser) {
+	for {
+		shouldStartApp := <-startAppChan
+		if shouldStartApp {
+			fmt.Println("\n\nBuilding...")
+			compileApp()
+			time.Sleep(time.Microsecond * 100)
+			pwd, _ := os.Getwd()
+			var command *exec.Cmd
+			execFile := pwd + "/tmp/" + path.Base(pwd)
+			fmt.Println("Starting...")
+			command = exec.Command("/bin/sh", "-c", execFile)
+			command.Env = os.Environ()
+			command.Dir = pwd
+			command.SysProcAttr = &syscall.SysProcAttr{
+				Setpgid: true,
+			}
+			stdout, err := command.StdoutPipe()
+			if err != nil {
+				fmt.Println("error getting a pipe to stdout")
+				panic(err)
+			}
+			err = command.Start()
+			// fmt.Println("start process state:", command.ProcessState.String())
+			if err != nil {
+				fmt.Println("error starting the app ", err.Error())
+				panic(err)
+			}
+			go func() {
+				cmdChan <- command
+			}()
+			go func() {
+				stdoutChan <- stdout
+			}()
+			oneByte := make([]byte, 100)
+			for {
+				n, err := stdout.Read(oneByte)
+				if err != nil {
+					break
+				}
+				fmt.Println(string(oneByte[:n]))
+			}
+			go func() {
+				startAppChan <- false
+			}()
+			command.Wait()
+		}
+	}
+}
+
+func compileApp() {
 	pwd, _ := os.Getwd()
 	var command *exec.Cmd
-	command = exec.Command("go", "run", "main.go")
+	command = exec.Command("/bin/sh", "-c", fmt.Sprintf("go build -o %v/tmp/", pwd))
+	command.Env = os.Environ()
+	command.SysProcAttr = &syscall.SysProcAttr{
+		Setpgid: true,
+	}
 	command.Dir = pwd
 	stdout, err := command.StdoutPipe()
+	defer stdout.Close()
 	if err != nil {
-		fmt.Println("error getting a pipe to stdout")
-		panic(err)
+		fmt.Println(err.Error())
 	}
-
-	command.Start()
-	processChan <- command.Process
-
+	err = command.Start()
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 	oneByte := make([]byte, 100)
 	for {
 		n, err := stdout.Read(oneByte)
@@ -117,11 +182,10 @@ func startServer(fileChangeChan chan bool, processChan chan *os.Process) {
 			break
 		}
 		fmt.Println(string(oneByte[:n]))
-
 	}
 	command.Wait()
 }
 
 func init() {
-	//rootCmd.AddCommand(runCmd)
+	rootCmd.AddCommand(runCmd)
 }
