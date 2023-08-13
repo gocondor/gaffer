@@ -8,7 +8,7 @@ import (
 	"os"
 	"testing"
 
-	. "github.com/gocondor/installer/gocondor/cmd"
+	. "github.com/gocondor/gaffer/cmd"
 	"github.com/stretchr/testify/assert"
 	"github.com/thanhpk/randstr"
 )

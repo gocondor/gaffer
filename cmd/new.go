@@ -36,7 +36,7 @@ type RepoMeta struct {
 }
 
 // Config file
-const CONFIG_URL string = "https://raw.githubusercontent.com/gocondor/installer/master/gocondor/config.json"
+const CONFIG_URL string = "https://raw.githubusercontent.com/gocondor/gaffer/master/config.json"
 
 const REPO_URL string = "https://api.github.com/repos/gocondor/gocondor/releases/latest"
 
@@ -211,7 +211,7 @@ func (cn *CmdNew) PrintUpdateRequiredMessage() {
 	This version of the GoCondor installer is outdated!
 	Please update by running the following commands:
 	
-	go get github.com/gocondor/installer/gocondor@latest
+	go get github.com/gocondor/gaffer@latest
 	
 			`)
 	os.Exit(1)

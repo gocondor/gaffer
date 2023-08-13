@@ -4,7 +4,7 @@
 
 package main
 
-import "github.com/gocondor/installer/gocondor/cmd"
+import "github.com/gocondor/gaffer/cmd"
 
 func main() {
 	cmd.Execute()
