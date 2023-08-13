@@ -2,9 +2,9 @@ name: build
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
 
@@ -19,4 +19,4 @@ jobs:
         go-version: 1.16
 
     - name: Build
-      run: cd ./gocondor && go build ./...
+      run: cd ./gaffer && go build ./...
