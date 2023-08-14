@@ -25,9 +25,9 @@ import (
 )
 
 type Config struct {
-	ReleaseUrl               string   `json:"releaseUrl"`
-	InstallerReleasedVersion string   `json:"installerReleasedVersion"`
-	Paths                    []string `json:"paths"`
+	ReleaseUrl         string   `json:"releaseUrl"`
+	CliReleasedVersion string   `json:"cliReleasedVersion"`
+	Paths              []string `json:"paths"`
 }
 
 type RepoMeta struct {
@@ -83,7 +83,7 @@ gocondor new my-app github.com/my-organization/my-app
 		var config Config
 		cn.DownloadConfig(&http.Client{}, CONFIG_URL, &config)
 		// Check for update
-		if yes := cn.IsUpdatedRequired(config.InstallerReleasedVersion); yes {
+		if yes := cn.IsUpdatedRequired(config.CliReleasedVersion); yes {
 			cn.PrintUpdateRequiredMessage()
 		}
 

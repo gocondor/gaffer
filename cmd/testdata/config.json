@@ -1,5 +1,5 @@
 {
-    "installerReleasedVersion": "dummyVersion",
+    "cliReleasedVersion": "dummyVersion",
     "releaseUrl": "dummyReleaseurl",
     "paths": [
         "dummyPath"

@@ -52,6 +52,7 @@ cli run:dev
 			for {
 				select {
 				case <-w.Event:
+
 					fileChangeChan <- true
 				case err := <-w.Error:
 					log.Fatalln(err)
@@ -84,13 +85,13 @@ func startRestartControllerJob(fileChangeChan chan bool, cmdChan chan *exec.Cmd,
 				killCmd := exec.Command("taskkill", "/T", "/F", "/PID", strconv.Itoa(startCmd.Process.Pid))
 				err := killCmd.Run()
 				if err != nil {
-					fmt.Printf("error stoping the dev server")
+					fmt.Printf("error stopping the dev server")
 				}
 			} else if runtime.GOOS == "darwin" {
 				// fmt.Println("stop process state:", startCmd.ProcessState.String())
 				err := startCmd.Process.Kill()
 				if err != nil {
-					fmt.Println("error stoping the dev server ")
+					fmt.Println("error stopping the dev server ")
 				}
 			}
 			go func() {
@@ -166,24 +167,14 @@ func compileApp() {
 		Setpgid: true,
 	}
 	command.Dir = pwd
-	stdout, err := command.StdoutPipe()
-	defer stdout.Close()
+	o, err := command.CombinedOutput()
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	err = command.Start()
-	if err != nil {
-		fmt.Println(err.Error())
+	if string(o) != "" {
+		fmt.Println(string(o))
 	}
-	oneByte := make([]byte, 100)
-	for {
-		n, err := stdout.Read(oneByte)
-		if err != nil {
-			break
-		}
-		fmt.Println(string(oneByte[:n]))
-	}
-	command.Wait()
+	fmt.Println("compile done!")
 }
 
 func init() {

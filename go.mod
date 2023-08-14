@@ -5,7 +5,6 @@ go 1.16
 require (
 	github.com/briandowns/spinner v1.12.0
 	github.com/c4milo/unpackit v0.1.0
-	github.com/gocondor/installer/gocondor v0.0.0-20230812131008-0d78295ee675
 	github.com/karrick/godirwalk v1.16.1
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/radovskyb/watcher v1.0.7

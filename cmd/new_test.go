@@ -30,7 +30,7 @@ func TestDownloadConfig(t *testing.T) {
 	newCmd.DownloadConfig(server.Client(), server.URL, &config)
 
 	// Assert
-	assert.Equal(t, "dummyVersion", config.InstallerReleasedVersion)
+	assert.Equal(t, "dummyVersion", config.CliReleasedVersion)
 	assert.Equal(t, "dummyReleaseurl", config.ReleaseUrl)
 }
 func TestDownloadGoCondor(t *testing.T) {
@@ -67,7 +67,7 @@ func TestIsUpdatedRequired(t *testing.T) {
 	json.Unmarshal(res, &config)
 
 	// Execute
-	check := cn.IsUpdatedRequired(config.InstallerReleasedVersion)
+	check := cn.IsUpdatedRequired(config.CliReleasedVersion)
 
 	// Assert
 	if check != true { // supposed to be true
