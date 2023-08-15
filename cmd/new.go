@@ -56,7 +56,7 @@ var newCmd = &cobra.Command{
 	Long: `Create new gocondor projects, 
 	
 Example:
-gocondor new my-app github.com/my-organization/my-app
+gaffer new myapp github.com/my-organization/myapp
 `,
 	Args: cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {

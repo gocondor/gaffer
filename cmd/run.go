@@ -23,10 +23,10 @@ import (
 // runCmd represents the run command
 var runCmd = &cobra.Command{
 	Use:   "run:dev",
-	Short: "Start the development server",
-	Long: `To Start the development server run the following command:
+	Short: "Start the app in hot reloading mode",
+	Long: `To Start the app in hot reloading mode for development run the following command:
 
-cli run:dev
+gaffer run:dev
 
 `,
 	Run: func(cmd *cobra.Command, args []string) {
