@@ -208,10 +208,10 @@ func (cn *CmdNew) IsUpdatedRequired(LatestReleasedVersion string) bool {
 // Print update required message
 func (cn *CmdNew) PrintUpdateRequiredMessage() {
 	fmt.Println(`
-	This version of the GoCondor installer is outdated!
+	This version of gaffer is outdated!
 	Please update by running the following commands:
 	
-	go get github.com/gocondor/gaffer@latest
+	go install github.com/gocondor/gaffer@latest
 	
 			`)
 	os.Exit(1)
