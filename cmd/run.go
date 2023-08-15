@@ -1,4 +1,4 @@
-// Copyright 2021 Harran Ali <harran.m@gmail.com>. All rights reserved.
+// Copyright © Harran Ali <harran.m@gmail.com>. All rights reserved.
 // Use of this source code is governed by MIT-style
 // license that can be found in the LICENSE file.
 
@@ -88,10 +88,9 @@ func startRestartControllerJob(fileChangeChan chan bool, cmdChan chan *exec.Cmd,
 					fmt.Printf("error stopping the dev server")
 				}
 			} else if runtime.GOOS == "darwin" {
-				// fmt.Println("stop process state:", startCmd.ProcessState.String())
 				err := startCmd.Process.Kill()
 				if err != nil {
-					fmt.Println("error stopping the dev server ")
+					fmt.Printf("error stopping the dev server: %v\n", err.Error())
 				}
 			}
 			go func() {
@@ -122,19 +121,13 @@ func startServerJob(cmdChan chan *exec.Cmd, startAppChan chan bool, stdoutChan c
 			command = exec.Command("/bin/sh", "-c", execFile)
 			command.Env = os.Environ()
 			command.Dir = pwd
-			command.SysProcAttr = &syscall.SysProcAttr{
-				Setpgid: true,
-			}
 			stdout, err := command.StdoutPipe()
 			if err != nil {
-				fmt.Println("error getting a pipe to stdout")
-				panic(err)
+				fmt.Printf("error getting a pipe to stdout: %v\n", err.Error())
 			}
 			err = command.Start()
-			// fmt.Println("start process state:", command.ProcessState.String())
 			if err != nil {
-				fmt.Println("error starting the app ", err.Error())
-				panic(err)
+				fmt.Printf("error starting the app: %v\n", err.Error())
 			}
 			go func() {
 				cmdChan <- command
@@ -174,7 +167,6 @@ func compileApp() {
 	if string(o) != "" {
 		fmt.Println(string(o))
 	}
-	fmt.Println("compile done!")
 }
 
 func init() {
