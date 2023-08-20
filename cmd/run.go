@@ -52,7 +52,6 @@ gaffer run:dev
 			for {
 				select {
 				case <-w.Event:
-
 					fileChangeChan <- true
 				case err := <-w.Error:
 					log.Fatalln(err)

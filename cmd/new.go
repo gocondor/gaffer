@@ -55,8 +55,8 @@ var newCmd = &cobra.Command{
 	Short: "Create a new gocondor projects",
 	Long: `Create new gocondor projects, 
 	
-Example:
-gaffer new myapp github.com/my-organization/myapp
+	Example:
+	gaffer new myapp github.com/my-organization/myapp
 `,
 	Args: cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
@@ -84,7 +84,14 @@ gaffer new myapp github.com/my-organization/myapp
 		cn.DownloadConfig(&http.Client{}, CONFIG_URL, &config)
 		// Check for update
 		if yes := cn.IsUpdatedRequired(config.CliReleasedVersion); yes {
-			cn.PrintUpdateRequiredMessage()
+			fmt.Println(`
+				This version of gaffer is outdated!
+				Please update by running the following commands:
+				
+				go install github.com/gocondor/gaffer@latest
+				
+			`)
+			os.Exit(0)
 		}
 
 		repoMeta := FetchRepoMeta(REPO_URL)
@@ -203,18 +210,6 @@ func (cn *CmdNew) IsUpdatedRequired(LatestReleasedVersion string) bool {
 		return true
 	}
 	return false
-}
-
-// Print update required message
-func (cn *CmdNew) PrintUpdateRequiredMessage() {
-	fmt.Println(`
-	This version of gaffer is outdated!
-	Please update by running the following commands:
-	
-	go install github.com/gocondor/gaffer@latest
-	
-			`)
-	os.Exit(1)
 }
 
 func fixImports(dirName string, projectRepo string, paths []string) {
