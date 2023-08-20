@@ -10,8 +10,8 @@ import (
 
 var GenerateMiddlewareCmd = &cobra.Command{
 	Use:   "gen:middleware",
-	Short: "Create a middleware function",
-	Long: `Helps you generate a boilderplate code for a middleware funtion
+	Short: "Create a middleware",
+	Long: `Helps you generate a boilderplate code for middlewares
 example:
 gaffer gen:middleware MyMiddleware
 

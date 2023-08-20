@@ -10,8 +10,8 @@ import (
 
 var GenerateEventJobCmd = &cobra.Command{
 	Use:   "gen:eventjob",
-	Short: "Create an event",
-	Long: `Helps you generate a boilderplate code for an event job funtion
+	Short: "Create an event job",
+	Long: `Helps you generate a boilderplate code for event jobs
 example:
 gaffer gen:eventjob EventJobName
 

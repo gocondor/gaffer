@@ -10,8 +10,8 @@ import (
 
 var GenerateHandlerCmd = &cobra.Command{
 	Use:   "gen:handler",
-	Short: "Create a handler function",
-	Long: `Helps you generate a boilderplate code for a handler funtion
+	Short: "Create a handler",
+	Long: `Helps you generate a boilderplate code for handlers
 example
 gaffer gen:handler ListUsers --file users.go
 
