@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"os"
 	"strings"
 	"unicode"
 )
@@ -58,4 +59,35 @@ var {JobName} core.EventJob = func(event *core.Event, c *core.Context) {
 `
 	res := strings.Replace(t, "{JobName}", jobName, 1)
 	return res
+}
+
+func prepareHandlerContent(HandlerName string) string {
+	t := `
+func {HandlerName}(c *core.Context) *core.Response {
+	// logic implementation goes here...
+
+	return nil
+}
+`
+	res := strings.Replace(t, "{HandlerName}", HandlerName, 1)
+	return res
+}
+
+func createHandlerFile(handlersFilePath string) (*os.File, error) {
+	file, err := os.Create(handlersFilePath)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = file.WriteString(`package handlers
+
+import (
+	"github.com/gocondor/core"
+)
+`)
+
+	if err != nil {
+		return nil, err
+	}
+	return file, nil
 }

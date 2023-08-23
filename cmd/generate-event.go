@@ -50,7 +50,6 @@ gaffer gen:event my-event-name --job EventJobName
 		}
 		eventNamesFileContentStr = strings.TrimSuffix(eventNamesFileContentStr, "\n")
 		eventNamesFileContentStr = eventNamesFileContentStr + "\n" + getEventNameStatement(prepareEventNameConst(eventName), eventName)
-		fmt.Println(eventNamesFileContentStr)
 		os.WriteFile(fPath, []byte(eventNamesFileContentStr), 666)
 		jfn := prepareJobFileName(eventJobName) + ".go"
 		ffnp := filepath.Join(pwd, "events/jobs", jfn)
