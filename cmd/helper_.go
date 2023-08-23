@@ -28,7 +28,7 @@ func prepareEventNameConst(eventName string) string {
 	return res
 }
 
-func prepareJobFileName(name string) string {
+func camelCaseToSnake(name string) string {
 	var res string
 	namesB := []byte(name)
 	for i, v := range namesB {
@@ -90,4 +90,19 @@ import (
 		return nil, err
 	}
 	return file, nil
+}
+
+func prepareMiddlewareContent(middlewareName string) string {
+	t := `package middlewares
+
+import (
+	"github.com/gocondor/core"
+)
+
+var {middlewareName} core.Middleware = func (c *core.Context) {
+	c.Next()
+}
+`
+	res := strings.Replace(t, "{middlewareName}", middlewareName, 1)
+	return res
 }
