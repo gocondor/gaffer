@@ -36,7 +36,7 @@ type RepoMeta struct {
 }
 
 // Config file
-const CONFIG_URL string = "https://raw.githubusercontent.com/gocondor/gaffer/master/config.json"
+const CONFIG_URL string = "https://raw.githubusercontent.com/gocondor/gaffer/main/config.json"
 
 const REPO_URL string = "https://api.github.com/repos/gocondor/gocondor/releases/latest"
 
@@ -44,7 +44,7 @@ const REPO_URL string = "https://api.github.com/repos/gocondor/gocondor/releases
 var tempName string
 
 // Current verson of the installer
-var version string = "v1.5.0"
+var version string = "v1.5.1"
 
 // struct for creating new project command
 type CmdNew struct{}

@@ -1,5 +1,5 @@
 {
-    "cliReleasedVersion": "v1.5.0",
+    "cliReleasedVersion": "v1.5.1",
     "releaseUrl": "https://github.com/gocondor/gocondor/archive/{name}.tar.gz",
     "paths": [
         "github.com/gocondor/gocondor"
