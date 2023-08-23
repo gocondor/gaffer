@@ -1,12 +1,9 @@
 # Gaffer
- 
-## [Under Development]
+
+![Build Status](https://github.com/gocondor/gaffer/actions/workflows/build.yml/badge.svg) ![Test Status](https://github.com/gocondor/gaffer/actions/workflows/test.yml/badge.svg)
 
 ### What's Gaffer?
-`Gaffer` is `GoCondor's` `cli` tool, it helps you create new projects and perform other tasks like run your app in the `live reloading` mode for development purpose.
-
-![Build Status](https://github.com/gocondor/gaffer/actions/workflows/build.yml/badge.svg)
-![Test Status](https://github.com/gocondor/gaffer/actions/workflows/test.yml/badge.svg)
+`Gaffer` is `GoCondor's` `cli` tool, it helps you create new projects and perform other tasks.
 
 
 ### Install
