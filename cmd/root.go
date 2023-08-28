@@ -15,7 +15,7 @@ var cfgFile string
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:     "gaffer",
-	Version: "v1.5.1",
+	Version: "v1.6.1",
 	Short:   "Gaffer is GoCondor's cli tool",
 	Long:    `Gaffer is GoCondor's cli tool for creating new projects and performing other tasks`,
 

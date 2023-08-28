@@ -44,7 +44,7 @@ const REPO_URL string = "https://api.github.com/repos/gocondor/gocondor/releases
 var tempName string
 
 // Current verson of the installer
-var version string = "v1.5.1"
+var version string = rootCmd.Version
 
 // struct for creating new project command
 type CmdNew struct{}
