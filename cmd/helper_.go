@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 	"strings"
 	"unicode"
@@ -28,7 +29,7 @@ func prepareEventNameConst(eventName string) string {
 	return res
 }
 
-func camelCaseToSnake(name string) string {
+func camelCaseToSnake(name string, sep string) string {
 	var res string
 	namesB := []byte(name)
 	for i, v := range namesB {
@@ -38,7 +39,7 @@ func camelCaseToSnake(name string) string {
 			if !unicode.IsUpper(rune(v)) {
 				res = res + string(v)
 			} else {
-				res = res + "-"
+				res = res + sep
 				res = res + strings.ToLower(string(v))
 			}
 		}
@@ -58,6 +59,26 @@ var {JobName} core.EventJob = func(event *core.Event, c *core.Context) {
 }
 `
 	res := strings.Replace(t, "{JobName}", jobName, 1)
+	return res
+}
+
+func prepareModelContent(modelName string, tableName string) string {
+	t := `package models
+
+import "gorm.io/gorm"
+
+type {modelName} struct {
+	gorm.Model
+	// add your field here...
+}
+
+// Override the table name
+func ({modelName}) TableName() string {
+	return "{tableName}"
+}
+`
+	res := strings.Replace(t, "{modelName}", modelName, 2)
+	res = strings.Replace(res, "{tableName}", tableName, 1)
 	return res
 }
 
@@ -105,4 +126,15 @@ var {middlewareName} core.Middleware = func (c *core.Context) {
 `
 	res := strings.Replace(t, "{middlewareName}", middlewareName, 1)
 	return res
+}
+
+func singleToPlural(word string) string {
+	lastOne := word[len(word)-1:]
+	lastTwo := word[len(word)-2:]
+	fmt.Println(string(lastOne), string(lastTwo), "+++++")
+	if lastOne == "s" || lastOne == "x" || lastOne == "z" || lastTwo == "sh" || lastTwo == "ch" {
+		return word + "es"
+	}
+
+	return word + "s"
 }

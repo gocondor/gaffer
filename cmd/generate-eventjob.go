@@ -33,7 +33,7 @@ gaffer gen:eventjob EventJobName
 			os.Exit(1)
 		}
 
-		jfn := camelCaseToSnake(eventJobName) + ".go"
+		jfn := camelCaseToSnake(eventJobName, "-") + ".go"
 		ffnp := filepath.Join(pwd, "events/jobs", jfn)
 		jfs, err := os.Stat(ffnp)
 		if err != nil && !os.IsNotExist(err) {

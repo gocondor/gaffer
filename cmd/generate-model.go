@@ -12,12 +12,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var GenerateMiddlewareCmd = &cobra.Command{
-	Use:   "gen:middleware [MiddlewareName]",
-	Short: "Create a middleware",
-	Long: `Helps you generate a boilderplate code for middlewares
+var GenerateModelCmd = &cobra.Command{
+	Use:   "gen:model [ModelName]",
+	Short: "Create a database model",
+	Long: `Helps you generate a boilderplate code for database model
 example:
-gaffer gen:middleware MyMiddleware
+gaffer gen:model User
 
 `,
 	Args: cobra.ExactArgs(1),
@@ -27,34 +27,36 @@ gaffer gen:middleware MyMiddleware
 			fmt.Println(err.Error())
 			os.Exit(1)
 		}
-		middlewareName := args[0]
+		modelName := args[0]
 		if err != nil {
 			fmt.Println(err.Error())
 			os.Exit(1)
 		}
 
-		mfn := camelCaseToSnake(middlewareName, "-") + ".go"
-		mfnp := filepath.Join(pwd, "middlewares", mfn)
-		jfs, err := os.Stat(mfnp)
+		mfn := camelCaseToSnake(modelName, "-") + ".go"
+		mfnp := filepath.Join(pwd, "models/", mfn)
+		mfs, err := os.Stat(mfnp)
 		if err != nil && !os.IsNotExist(err) {
 			fmt.Printf("problem creating the file: %v\n", mfnp)
 			os.Exit(1)
 		}
 
-		if jfs != nil {
+		if mfs != nil {
 			fmt.Printf("file \"%v\" already exist\n", mfn)
 			os.Exit(1)
 		}
-		mwFile, err := os.Create(mfnp)
+		ModelFile, err := os.Create(mfnp)
 		if err != err {
 			fmt.Println(err.Error())
 			os.Exit(1)
 		}
-		mwFile.WriteString(prepareMiddlewareContent(middlewareName))
-		mwFile.Close()
+		tableName := camelCaseToSnake(modelName, "_")
+		tableName = singleToPlural(tableName)
+		ModelFile.WriteString(prepareModelContent(modelName, tableName))
+		ModelFile.Close()
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(GenerateMiddlewareCmd)
+	rootCmd.AddCommand(GenerateModelCmd)
 }
