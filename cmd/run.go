@@ -6,7 +6,6 @@ package cmd
 
 import (
 	"fmt"
-	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -33,8 +32,7 @@ gaffer run:dev
 		pwd, _ := os.Getwd()
 		fileChangeChan := make(chan bool, 5)
 		startAppChan := make(chan bool, 5)
-		stdoutChan := make(chan io.ReadCloser, 5)
-		cmdChan := make(chan *exec.Cmd)
+		pidChan := make(chan int, 5)
 		fileChangeChan <- false
 		startAppChan <- false
 		w := watcher.New()
@@ -63,8 +61,8 @@ gaffer run:dev
 		go func() {
 			startAppChan <- true
 		}()
-		go startServerJob(cmdChan, startAppChan, stdoutChan)
-		go startRestartControllerJob(fileChangeChan, cmdChan, startAppChan, stdoutChan)
+		go startServerJob(pidChan, startAppChan)
+		go startRestartControllerJob(fileChangeChan, pidChan, startAppChan)
 
 		func() {
 			if err := w.Start(time.Millisecond * 100); err != nil {
@@ -74,83 +72,88 @@ gaffer run:dev
 	},
 }
 
-func startRestartControllerJob(fileChangeChan chan bool, cmdChan chan *exec.Cmd, startAppChan chan bool, stdoutChan chan io.ReadCloser) {
+func startRestartControllerJob(fileChangeChan chan bool, pidChan chan int, startAppChan chan bool) {
 	for {
 		fileChanged := <-fileChangeChan
 		if fileChanged {
 			fmt.Println("Restarting...")
-			startCmd := <-cmdChan
-			if runtime.GOOS == "windows" {
-				killCmd := exec.Command("taskkill", "/T", "/F", "/PID", strconv.Itoa(startCmd.Process.Pid))
-				err := killCmd.Run()
-				if err != nil {
-					fmt.Printf("error stopping the dev server")
+			pid := <-pidChan
+			if pid != 0 {
+				if runtime.GOOS == "windows" {
+					killCmd := exec.Command("taskkill", "/T", "/F", "/PID", strconv.Itoa(pid))
+					err := killCmd.Run()
+					if err != nil {
+						fmt.Println("error stopping the dev server", err.Error())
+					}
+				} else if runtime.GOOS == "darwin" {
+					fmt.Println(pid)
+					err := syscall.Kill(pid, syscall.SIGKILL)
+					if err != nil {
+						fmt.Sprintln("got error killing app")
+						fmt.Println(err.Error())
+					}
+				} else {
+					fmt.Println("not implemented for os: ", runtime.GOOS)
 				}
-			} else if runtime.GOOS == "darwin" {
-				err := startCmd.Process.Kill()
-				if err != nil {
-					fmt.Printf("error stopping the dev server: %v\n", err.Error())
-				}
+				go func() {
+					startAppChan <- true
+				}()
+				go func() {
+					fileChangeChan <- false
+				}()
+			} else {
+				go func() {
+					startAppChan <- true
+				}()
+				go func() {
+					fileChangeChan <- false
+				}()
 			}
-			go func() {
-				startAppChan <- true
-			}()
-			go func() {
-				fileChangeChan <- false
-			}()
-			startCmdStdout := <-stdoutChan
-			if startCmdStdout != nil {
-				startCmdStdout.Close()
-			}
+
 		}
 	}
 }
 
-func startServerJob(cmdChan chan *exec.Cmd, startAppChan chan bool, stdoutChan chan io.ReadCloser) {
+func startServerJob(pidChan chan int, startAppChan chan bool) {
 	for {
 		shouldStartApp := <-startAppChan
 		if shouldStartApp {
 			fmt.Println("\n\nBuilding...")
-			compileApp()
-			time.Sleep(time.Microsecond * 100)
-			pwd, _ := os.Getwd()
-			var command *exec.Cmd
-			execFile := pwd + "/tmp/" + path.Base(pwd)
-			fmt.Println("Starting...")
-			command = exec.Command("/bin/sh", "-c", execFile)
-			command.Env = os.Environ()
-			command.Dir = pwd
-			stdout, err := command.StdoutPipe()
+			err := compileApp()
 			if err != nil {
-				fmt.Printf("error getting a pipe to stdout: %v\n", err.Error())
-			}
-			err = command.Start()
-			if err != nil {
-				fmt.Printf("error starting the app: %v\n", err.Error())
-			}
-			go func() {
-				cmdChan <- command
-			}()
-			go func() {
-				stdoutChan <- stdout
-			}()
-			oneByte := make([]byte, 100)
-			for {
-				n, err := stdout.Read(oneByte)
-				if err != nil {
-					break
+				fmt.Println(err.Error())
+				go func() {
+					pidChan <- 0
+				}()
+			} else {
+				pwd, _ := os.Getwd()
+				execFile := pwd + "/tmp/" + path.Base(pwd)
+				fmt.Println("Starting...")
+				args := []string{""}
+				execSpec := &syscall.ProcAttr{
+					Env:   os.Environ(),
+					Files: []uintptr{os.Stdin.Fd(), os.Stdout.Fd(), os.Stderr.Fd()},
+					Sys: &syscall.SysProcAttr{
+						Setpgid: true,
+					},
 				}
-				fmt.Println(string(oneByte[:n]))
+				pid, _, err := syscall.StartProcess(execFile, args, execSpec)
+				if err != nil {
+					fmt.Println(err.Error())
+					go func() {
+						pidChan <- 0
+					}()
+				} else {
+					go func() {
+						pidChan <- pid
+					}()
+				}
 			}
-			go func() {
-				startAppChan <- false
-			}()
-			command.Wait()
 		}
 	}
 }
 
-func compileApp() {
+func compileApp() error {
 	pwd, _ := os.Getwd()
 	var command *exec.Cmd
 	command = exec.Command("/bin/sh", "-c", fmt.Sprintf("go build -o %v/tmp/", pwd))
@@ -160,12 +163,13 @@ func compileApp() {
 	}
 	command.Dir = pwd
 	o, err := command.CombinedOutput()
-	if err != nil {
-		fmt.Println(err.Error())
-	}
 	if string(o) != "" {
 		fmt.Println(string(o))
 	}
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func init() {
