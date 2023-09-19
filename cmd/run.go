@@ -72,12 +72,19 @@ gaffer run:dev
 		go func(termSigsChan chan os.Signal) {
 			for {
 				<-termSigsChan
-				pgid, err := syscall.Getpgid(pid)
-				if err != nil {
-					fmt.Println("error getting pgid: ", err)
+				if pid == 0 {
+					os.Exit(0)
+				} else {
+					pgid, err := syscall.Getpgid(pid)
+					if err != nil {
+						fmt.Println("error getting pgid: ", err)
+					}
+					err = syscall.Kill(-pgid, syscall.SIGKILL)
+					if err != nil {
+						fmt.Println("error stopping process: ", err)
+					}
+					os.Exit(0)
 				}
-				syscall.Kill(-pgid, syscall.SIGKILL)
-				os.Exit(0)
 			}
 
 		}(termSigsChan)
