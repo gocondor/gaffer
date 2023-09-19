@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"os/signal"
 	"path"
 	"runtime"
 	"strconv"
@@ -18,6 +19,8 @@ import (
 	"github.com/radovskyb/watcher"
 	"github.com/spf13/cobra"
 )
+
+var pid int
 
 // runCmd represents the run command
 var runCmd = &cobra.Command{
@@ -30,9 +33,11 @@ gaffer run:dev
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		pwd, _ := os.Getwd()
-		fileChangeChan := make(chan bool, 5)
-		startAppChan := make(chan bool, 5)
-		pidChan := make(chan int, 5)
+		fileChangeChan := make(chan bool, 1)
+		startAppChan := make(chan bool, 1)
+		pidChan := make(chan int, 1)
+		termSigsChan := make(chan os.Signal, 1)
+
 		fileChangeChan <- false
 		startAppChan <- false
 		w := watcher.New()
@@ -63,6 +68,19 @@ gaffer run:dev
 		}()
 		go startServerJob(pidChan, startAppChan)
 		go startRestartControllerJob(fileChangeChan, pidChan, startAppChan)
+		signal.Notify(termSigsChan, syscall.SIGINT, syscall.SIGTERM)
+		go func(termSigsChan chan os.Signal) {
+			for {
+				<-termSigsChan
+				pgid, err := syscall.Getpgid(pid)
+				if err != nil {
+					fmt.Println("error getting pgid: ", err)
+				}
+				syscall.Kill(-pgid, syscall.SIGKILL)
+				os.Exit(0)
+			}
+
+		}(termSigsChan)
 
 		func() {
 			if err := w.Start(time.Millisecond * 100); err != nil {
@@ -86,11 +104,13 @@ func startRestartControllerJob(fileChangeChan chan bool, pidChan chan int, start
 						fmt.Println("error stopping the dev server", err.Error())
 					}
 				} else if runtime.GOOS == "darwin" {
-					fmt.Println(pid)
-					err := syscall.Kill(pid, syscall.SIGKILL)
+					pgid, err := syscall.Getpgid(pid)
 					if err != nil {
-						fmt.Sprintln("got error killing app")
-						fmt.Println(err.Error())
+						fmt.Println("error getting pgid: ", err.Error())
+					}
+					err = syscall.Kill(-pgid, syscall.SIGKILL)
+					if err != nil {
+						fmt.Println("error stopping process: ", err.Error())
 					}
 				} else {
 					fmt.Println("not implemented for os: ", runtime.GOOS)
@@ -98,18 +118,14 @@ func startRestartControllerJob(fileChangeChan chan bool, pidChan chan int, start
 				go func() {
 					startAppChan <- true
 				}()
-				go func() {
-					fileChangeChan <- false
-				}()
 			} else {
 				go func() {
 					startAppChan <- true
 				}()
-				go func() {
-					fileChangeChan <- false
-				}()
 			}
-
+			go func() {
+				fileChangeChan <- false
+			}()
 		}
 	}
 }
@@ -121,32 +137,41 @@ func startServerJob(pidChan chan int, startAppChan chan bool) {
 			fmt.Println("\n\nBuilding...")
 			err := compileApp()
 			if err != nil {
-				fmt.Println(err.Error())
+				fmt.Println("error building: ", err.Error())
 				go func() {
 					pidChan <- 0
 				}()
 			} else {
-				pwd, _ := os.Getwd()
-				execFile := pwd + "/tmp/" + path.Base(pwd)
 				fmt.Println("Starting...")
-				args := []string{""}
-				execSpec := &syscall.ProcAttr{
-					Env:   os.Environ(),
-					Files: []uintptr{os.Stdin.Fd(), os.Stdout.Fd(), os.Stderr.Fd()},
-					Sys: &syscall.SysProcAttr{
-						Setpgid: true,
-					},
-				}
-				pid, _, err := syscall.StartProcess(execFile, args, execSpec)
-				if err != nil {
-					fmt.Println(err.Error())
-					go func() {
-						pidChan <- 0
-					}()
+				pwd, _ := os.Getwd()
+				if runtime.GOOS == "darwin" {
+					execFile := pwd + "/tmp/" + path.Base(pwd)
+					binary, lookErr := exec.LookPath("/bin/sh")
+					if lookErr != nil {
+						panic(lookErr)
+					}
+					args := []string{"/bin/sh", "-c", execFile}
+					execSpec := &syscall.ProcAttr{
+						Dir:   pwd,
+						Env:   os.Environ(),
+						Files: []uintptr{os.Stdin.Fd(), os.Stdout.Fd(), os.Stderr.Fd()},
+						Sys: &syscall.SysProcAttr{
+							Setpgid: true,
+						},
+					}
+					pid, _, err = syscall.StartProcess(binary, args, execSpec)
+					if err != nil {
+						fmt.Println("error starting process: ", err.Error())
+						go func() {
+							pidChan <- 0
+						}()
+					} else {
+						go func() {
+							pidChan <- pid
+						}()
+					}
 				} else {
-					go func() {
-						pidChan <- pid
-					}()
+					fmt.Println("not implemented for os: ", runtime.GOOS)
 				}
 			}
 		}
