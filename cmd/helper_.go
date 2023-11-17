@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 	"strings"
 	"unicode"
@@ -131,7 +130,6 @@ var {middlewareName} core.Middleware = func (c *core.Context) {
 func singleToPlural(word string) string {
 	lastOne := word[len(word)-1:]
 	lastTwo := word[len(word)-2:]
-	fmt.Println(string(lastOne), string(lastTwo), "+++++")
 	if lastOne == "s" || lastOne == "x" || lastOne == "z" || lastTwo == "sh" || lastTwo == "ch" {
 		return word + "es"
 	}
