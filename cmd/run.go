@@ -43,6 +43,7 @@ gaffer run:dev
 		w := watcher.New()
 		w.SetMaxEvents(1)
 		w.IgnoreHiddenFiles(true)
+		w.IgnoreHiddenFiles(false)
 		w.Ignore(
 			pwd+"/logs/app.log",
 			pwd+"/tmp",
