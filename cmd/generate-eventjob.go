@@ -34,7 +34,7 @@ gaffer gen:eventjob EventJobName
 		}
 
 		jfn := camelCaseToSnake(eventJobName, "-") + ".go"
-		ffnp := filepath.Join(pwd, "events/jobs", jfn)
+		ffnp := filepath.Join(pwd, "events/eventjobs", jfn)
 		jfs, err := os.Stat(ffnp)
 		if err != nil && !os.IsNotExist(err) {
 			fmt.Printf("problem creating the file: %v\n", ffnp)
