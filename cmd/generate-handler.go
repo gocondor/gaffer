@@ -54,6 +54,7 @@ gaffer gen:handler ListUsers --file users.go
 			os.Exit(1)
 		}
 		handlersFile.WriteString(prepareHandlerContent(handlerName))
+		fmt.Println("handler generated successfully")
 	},
 }
 

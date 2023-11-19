@@ -52,6 +52,7 @@ gaffer gen:middleware MyMiddleware
 		}
 		mwFile.WriteString(prepareMiddlewareContent(middlewareName))
 		mwFile.Close()
+		fmt.Println("middleware generated successfully")
 	},
 }
 

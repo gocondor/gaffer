@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -115,6 +116,9 @@ var newCmd = &cobra.Command{
 		//remove .github folder
 		os.RemoveAll(projectPath + "/.github")
 
+		// copy the env file
+		CopyFile(filepath.Join(projectPath, ".env-example"), projectPath, ".env")
+
 		// Fix imports
 		fixImports(projectPath, projectRepo, config.Paths)
 
@@ -147,7 +151,7 @@ var newCmd = &cobra.Command{
 		// Hide the spinner
 		s.Stop()
 
-		fmt.Println("done!")
+		fmt.Println(projectName + " created successfully")
 	},
 }
 

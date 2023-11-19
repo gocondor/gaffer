@@ -52,6 +52,7 @@ gaffer gen:eventjob EventJobName
 		}
 		jobFile.WriteString(prepareJobContent(eventJobName))
 		jobFile.Close()
+		fmt.Println("event job generated successfully")
 	},
 }
 

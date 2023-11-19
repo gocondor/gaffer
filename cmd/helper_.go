@@ -1,8 +1,13 @@
 package cmd
 
 import (
+	"errors"
+	"fmt"
+	"io"
 	"os"
+	"path/filepath"
 	"strings"
+	"syscall"
 	"unicode"
 )
 
@@ -135,4 +140,45 @@ func singleToPlural(word string) string {
 	}
 
 	return word + "s"
+}
+
+func CopyFile(sourceFilePath string, destFolderPath string, newFileName string) error {
+	o := syscall.Umask(0)
+	defer syscall.Umask(o)
+	// newFileName := filepath.Base(sourceFilePath)
+	os.MkdirAll(destFolderPath, 766)
+	srcFileInfo, err := os.Stat(sourceFilePath)
+	if err != nil {
+		return err
+	}
+	if !srcFileInfo.Mode().IsRegular() {
+		return errors.New("can not move file, not in a regular mode")
+	}
+	srcFile, err := os.Open(sourceFilePath)
+	if err != nil {
+		return err
+	}
+	defer srcFile.Close()
+	destFilePath := filepath.Join(destFolderPath, newFileName)
+	destFile, err := os.Create(destFilePath)
+	if err != nil {
+		return err
+	}
+	buff := make([]byte, 1024*8)
+	for {
+		n, err := srcFile.Read(buff)
+		if err != nil && err != io.EOF {
+			panic(fmt.Sprintf("error moving file %v", sourceFilePath))
+		}
+		if n == 0 {
+			break
+		}
+		_, err = destFile.Write(buff[:n])
+		if err != nil {
+			return err
+		}
+	}
+	destFile.Close()
+
+	return nil
 }

@@ -54,6 +54,7 @@ gaffer gen:model User
 		tableName = singleToPlural(tableName)
 		ModelFile.WriteString(prepareModelContent(modelName, tableName))
 		ModelFile.Close()
+		fmt.Println("model generated successfully")
 	},
 }
 
